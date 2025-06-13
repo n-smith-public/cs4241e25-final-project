@@ -1,0 +1,4 @@
+**Final Project Proposal**
+Members: Nick Smith
+
+My project will be the continuation of my Magnolia project, with further implementation of tools to make it more efficient and realistic to use. Ideally, I plan to improve the table by making it sortable by any category simply by clicking on the associated header like one can do in a SQL view statement. I also want to add a more secure log-in system using Github/Google OAuth if possible, as when I tried to set it up in the past I encountered multiple difficulties. If I can find a way to do it, I would also like there to  be a way to import an .ical file (or other calendar format) which will add tasks based on your calendar. I also plan to standardize more of the UI elements, as currently it is slightly inconsistent.
