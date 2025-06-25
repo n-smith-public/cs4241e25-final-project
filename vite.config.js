@@ -16,6 +16,9 @@ export default defineConfig({
       '/editTask': 'http://localhost:3000/',
       '/complete': 'http://localhost:3000/',
       '/logout': 'http://localhost:3000/',
+      '/recycleBin': 'http://localhost:3000/',
+      '/restoreTask': 'http://localhost:3000/',
+      '/deletePermanently': 'http://localhost:3000/',
     }
   },
   build: {

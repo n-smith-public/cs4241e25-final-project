@@ -70,14 +70,16 @@
     role="dialog" 
     aria-modal="true" 
     aria-labelledby="import-title"
-    tabindex="-1"
     transition:fade="{{ duration: 300 }}"
-    on:click={onClose}
+    tabindex="-1"
+    on:click={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    on:keydown={(e) => e.key === 'Escape' && onClose()}
 >
     <div 
         class="modal-content" 
         role="document"
         transition:fly="{{ y: -50, duration: 300 }}"
+        tabindex="0"
         on:click|stopPropagation
     >
         <div class="modal-header">
@@ -95,7 +97,11 @@
         <div class="modal-body">
             <p class="import-info">
                 Found {events.length} event{events.length === 1 ? '' : 's'} in your calendar file. 
-                Select which events you'd like to import as tasks:
+                {#if events.length === 0}
+                    <span class="no-events">All events from your calendar already exist, or your calendar is empty.</span>
+                {:else}
+                    Select which events you'd like to import as tasks:
+                {/if}
             </p>
             
             <div class="selection-controls">
@@ -103,6 +109,7 @@
                     type="button" 
                     class="btn-secondary small" 
                     on:click={handleSelectAll}
+                    aria-label="Select all events for import"
                 >
                     Select All
                 </button>
@@ -110,6 +117,7 @@
                     type="button" 
                     class="btn-secondary small" 
                     on:click={handleDeselectAll}
+                    aria-label="Deselect all events"
                 >
                     Deselect All
                 </button>
@@ -120,39 +128,41 @@
             
             <div class="events-list">
                 {#each events as event (event.id)}
-                    <div class="event-item" class:selected={selectedEvents.has(event.id)}>
-                        <label class="event-checkbox">
+                        <label class="event-checkbox" class:selected={selectedEvents.has(event)}>
                             <input 
                                 type="checkbox" 
                                 checked={selectedEvents.has(event.id)}
                                 on:change={() => handleToggleEvent(event.id)}
+                                aria-label="Select {event.summary} for import"
                             >
                             <div class="event-details">
                                 <div class="event-summary">{event.summary}</div>
                                 <div class="event-meta">
                                     <span class="event-date">{formatDate(event.startDate)}</span>
                                     <div class="priority-container">
+                                        <label for="priority-{event.id}" class="visually-hidden">Priority for {event.summary}</label>
                                         <select
-                                        class="priority-select field"
-                                        value={event.priority}
-                                        on:change={(e) => handleSelectChange(event.id, e)}
-                                        style="color: {getPriorityColor(event.priority)}"
-                                    >
-                                            <option value="high" style="color: var(--highlight)">High</option>
-                                            <option value="medium" style="color: var(--links)">Medium</option>
-                                            <option value="low" style="color: var(--option)">Low</option>
-                                        </select>
-                                    </div>
+                                            id="priority-{event.id}"
+                                            class="priority-select field"
+                                            value={event.priority}
+                                            on:change|stopPropagation={(e) => handleSelectChange(event.id, e)}
+                                            style="color: {getPriorityColor(event.priority)}"
+                                            aria-label="Set priority for {event.summary}"
+                                        >
+                                        <option value="high" style="color: var(--highlight)">High</option>
+                                        <option value="medium" style="color: var(--links)">Medium</option>
+                                        <option value="low" style="color: var(--option)">Low</option>
+                                    </select>
                                 </div>
-                                {#if event.description}
-                                    <div class="event-description">{event.description}</div>
-                                {/if}
-                                {#if event.location}
-                                    <div class="event-location">📍 {event.location}</div>
-                                {/if}
                             </div>
-                        </label>
-                    </div>
+                             {#if event.description}
+                                <div class="event-description">{event.description}</div>
+                            {/if}
+                            {#if event.location}
+                                <div class="event-location">📍 {event.location}</div>
+                            {/if}
+                         </div>
+                    </label>
                 {/each}
             </div>
         </div>
@@ -163,6 +173,7 @@
                 class="btn-primary" 
                 on:click={handleImport}
                 disabled={selectedEvents.size === 0}
+                aria-label="Import {selectedEvents.size} selected task{selectedEvents.size === 1 ? '' : 's'}"
             >
                 Import {selectedEvents.size} Task{selectedEvents.size === 1 ? '' : 's'}
             </button>
@@ -170,6 +181,7 @@
                 type="button" 
                 class="btn-secondary" 
                 on:click={onClose}
+                aria-label="Cancel import and close modal"
             >
                 Cancel
             </button>
@@ -243,6 +255,14 @@
         margin-bottom: 1rem;
         color: var(--option);
     }
+
+    .no-events-note {
+        display: block;
+        font-style: italic;
+        color: var(--option);
+        opacity: 0.8;
+        margin-top: 0.5rem;
+    }
     
     .selection-controls {
         display: flex;
@@ -270,21 +290,6 @@
         gap: 0.5rem;
         max-height: 400px;
         overflow-y: auto;
-    }
-    
-    .event-item {
-        border: 1px solid var(--option);
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-    
-    .event-item:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-    
-    .event-item.selected {
-        border-color: var(--links);
-        background-color: rgba(17, 77, 156, 0.1);
     }
     
     .event-checkbox {
@@ -342,10 +347,6 @@
         color: var(--option);
     }
     
-    .event-priority {
-        font-weight: bold;
-    }
-    
     .event-description, .event-location {
         font-size: 0.85rem;
         color: var(--option);
@@ -399,5 +400,17 @@
         background-color: var(--highlight);
         color: var(--base);
         border-color: var(--highlight);
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 </style>

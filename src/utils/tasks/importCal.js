@@ -1,12 +1,34 @@
 import ICAL from 'ical.js';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import swal from 'sweetalert';
-import { loadTasks } from './fetchTask.js';
+import { loadTasks, tasks } from './fetchTask.js';
 import { taskDueDate } from './newTask.js';
 
 export const showImportModal = writable(false);
 export const importEvents = writable([]);
 export const selectedEvents = writable(new Set());
+
+function normalizeTaskForComparison(task) {
+    return {
+        name: task.taskName?.trim().toLowerCase() || '',
+        description: task.taskDescription?.trim().toLowerCase() || '',
+        dueDate: new Date(task.taskDueDate).getTime(), // Convert to timestamp for accurate comparison
+        priority: task.taskPriority?.toLowerCase() || 'medium'
+    };
+}
+
+function taskAlreadyExists(eventTask, existingTasks) {
+    const normalizedEventTask = normalizeTaskForComparison(eventTask);
+    
+    return existingTasks.some(existingTask => {
+        const normalizedExistingTask = normalizeTaskForComparison(existingTask);
+        
+        return normalizedEventTask.name === normalizedExistingTask.name &&
+               normalizedEventTask.description === normalizedExistingTask.description &&
+               normalizedEventTask.dueDate === normalizedExistingTask.dueDate &&
+               normalizedEventTask.priority === normalizedExistingTask.priority;
+    });
+}
 
 export function parseIcal(fileContent) {
     try {
@@ -94,9 +116,53 @@ export async function handleFileImport(event) {
             return;
         }
 
-        events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+        const currentTasks = get(tasks);
+        const newEvents = [];
+        const duplicateCount = [];
 
-        importEvents.set(events);
+        for (const event of events) {
+            const taskDueDate = formatDateForInput(new Date(event.dueDate));
+            let description = event.description || '';
+
+            if (event.location) {
+                description += description ? `\nLocation: ${event.location}` : `Location: ${event.location}`;
+            }
+
+            if (!description.trim()) {
+                description = 'Imported from iCal';
+            }
+
+            const potentialTask = {
+                taskName: event.summary || 'Untitled Event',
+                taskDescription: description,
+                taskDueDate: taskDueDate,
+                taskPriority: event.priority || 'medium',
+            };
+
+            if (!taskAlreadyExists(potentialTask, currentTasks)) {
+                newEvents.push(event);
+            } else {
+                duplicateCount.push(event.summary);
+            }
+        }
+
+        if (newEvents.length === 0) {
+            if (duplicateCount.length > 0) {
+                swal('No New Tasks', `All ${duplicateCount.length} event(s) from your calendar already exist as tasks.`, 'info');
+            }
+            else {
+                swal('No Events Found', 'The iCal file does not contain any new events to import.', 'info');
+            }
+            return;
+        }
+
+        newEvents.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+        if (duplicateCount.length > 0) {
+            console.log(`Filtered out ${duplicateCount.length} duplicate tasks(s):`, duplicateCount);
+        }
+
+        importEvents.set(newEvents);
         selectedEvents.set(new Set());
         showImportModal.set(true);
     } catch (error) {

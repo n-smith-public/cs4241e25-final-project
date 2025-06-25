@@ -1,40 +1,44 @@
-import { writable, get } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 
 export const selectedTasks = writable(new Set());
 export const selectAll = writable(false);
-export const showActionMenu = writable(false);
+export const showActionMenu = derived(selectedTasks, ($selectedTasks) => $selectedTasks.size > 0);
 
 // Allows user to select checkbox in the header to select all tasks
-export function handleSelectAll(currentTasks) {
+export function handleSelectAll(tasks) {
     const currentSelectAll = get(selectAll);
+    const currentTasks = get(tasks);
 
     // If all tasks are selected, deselect them; otherwise, select all
     if (currentSelectAll) {
-      selectedTasks.set(new Set(currentTasks.map(task => task._id)));
-    } else {
       selectedTasks.set(new Set());
+      selectAll.set(false);
+    } else {
+      const allTaskIds = new Set(currentTasks.map(task => task._id));
+      selectedTasks.set(allTaskIds);
+      selectAll.set(true);
     }
-    updateActionMenu();
 }
 
 // Allows user to select individual tasks by clicking on the checkbox
-export function handleTaskSelect(taskId, currentTasks) {
-  // Check if the selected task is already in the selectedTasks set
-    const currentSelectedTasks = get(selectedTasks);
-
-    // If it is, remove it; otherwise, add it
-    if (currentSelectedTasks.has(taskId)) {
-      currentSelectedTasks.delete(taskId);
+export function handleTaskSelect(taskId, tasks) {
+  selectedTasks.update(selected => {
+    const newSelected = new Set(selected);
+    if (newSelected.has(taskId)) {
+      newSelected.delete(taskId); // Deselect the task if it was already selected
     } else {
-      currentSelectedTasks.add(taskId);
+      newSelected.add(taskId); // Select the task if it was not selected
     }
-    selectedTasks.set(new Set(currentSelectedTasks)); // Trigger reactivity
-    selectAll.set(currentSelectedTasks.size === currentTasks.length);
-    updateActionMenu();
+    
+    const currentTasks = get(tasks);
+    const allSelected = currentTasks.length > 0 && newSelected.size === currentTasks.length;
+    selectAll.set(allSelected);
+
+    return newSelected;
+  })
 }
 
-// Updates the visibility of the action menu based on the number of selected tasks
-export function updateActionMenu() {
-  const currentSelectedTasks = get(selectedTasks);
-  showActionMenu.set(currentSelectedTasks.size > 0);
+export function clearSelections() {
+  selectedTasks.set(new Set());
+  selectAll.set(false);
 }

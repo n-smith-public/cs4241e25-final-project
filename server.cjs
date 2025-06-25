@@ -36,6 +36,7 @@ mongoClient.connect().then(client => {
     const db = client.db(dbName);
     usersCollection = db.collection('users');
     tasksCollection = db.collection('tasks');
+    binCollection = db.collection('bin');
     console.log('Connected to MongoDB');
 }).catch(err => {
     console.error('Failed to connect to MongoDB:', err.message);
@@ -133,7 +134,7 @@ app.get('/', (req, res) => {
 
 /* -- This request prevents the user from attempting to do anything if the database is not ready, mainly as a precaution. -- */
 app.use((req, res, next) => {
-    if (!usersCollection || !tasksCollection) {
+    if (!usersCollection || !tasksCollection || !binCollection) {
         return res.status(503).json({ error: 'Database not ready. Please try again later.' });
     }
     next();
@@ -344,18 +345,131 @@ app.post('/deleteTask', async (req, res) => {
     if (!Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ error: 'No task IDs provided.' });
     }
-    // Otherwise, convert the string IDs from the website to ObjectId objects for MongoDB.
-    const objectIds = ids.map(id => new ObjectId(id));
-    // Attempt to delete the tasks from the database.
-    const result = await tasksCollection.deleteMany({ _id: { $in: objectIds }, email });
-    // If the deletion was successful, return a 200 success response.
-    if (result.deletedCount > 0) {
-        res.status(200).json({ status: 'success', message: 'Tasks deleted successfully.' });
-    } else {
-        // Otherwise, return a 404 not found error.
-        res.status(404).json({ status: 'error', message: 'No tasks found for the provided IDs.' });
+
+    try {
+        const objectIds = ids.map(id => new ObjectId(id));
+
+        const tasksToDelete = await tasksCollection.find({ _id: { $in: objectIds }, email }).toArray();
+
+        if (tasksToDelete.length === 0) {
+            return res.status(404).json({ status: 'error', message: 'No tasks found for the provided IDs.' });
+        }
+
+        const binTasks = tasksToDelete.map(task => ({
+            ...task,
+            originalId: task._id,
+            deletedAt: new Date(),
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        }));
+
+        await binCollection.insertMany(binTasks);
+
+        const result = await tasksCollection.deleteMany({ _id: { $in: objectIds }, email });
+
+        if (result.deletedCount > 0) {
+            res.status(200).json({ status: 'success', message: 'Tasks deleted successfully.' });
+        } else {
+            res.status(500).json({ status: 'error', message: 'Failed to move tasks to bin.' });
+        }
+    } catch (error) {
+        console.error('Error deleting tasks:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to delete tasks.' });
     }
-})
+});
+
+app.get('/recycleBin', async (req, res) => {
+    if (!req.cookies.auth || req.cookies.auth !== 'true' || !req.cookies.email) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const email = req.cookies.email;
+
+    try {
+        await binCollection.deleteMany({
+            email,
+            expiresAt: { $lt: new Date() }
+        });
+
+        const binItems = await binCollection.find({ email }).toArray();
+
+        binItems.forEach(item => {
+            item.id = item._id.toString();
+        });
+
+        res.json(binItems);
+    } catch (error) {
+        console.error('Error fetching recycle bin items:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to fetch recycle bin items.' });
+    }
+});
+
+app.post('/restoreTask', async (req, res) => {
+    if (!req.cookies.auth || req.cookies.auth !== 'true' || !req.cookies.email) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const email = req.cookies.email;
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'No task IDs provided.' });
+    }
+
+    try {
+        const objectIds = ids.map(id => new ObjectId(id));
+
+        const tasksToRestore = await binCollection.find({ _id: { $in: objectIds }, email }).toArray();
+
+        if (tasksToRestore.length === 0) {
+            return res.status(404).json({ status: 'error', message: 'No tasks found for the provided IDs.' });
+        }
+
+        const restoredTasks = tasksToRestore.map(task => {
+            const { _id, deletedAt, expiresAt, originalId, ...restoredTask } = task;
+            return restoredTask;
+        });
+
+        await tasksCollection.insertMany(restoredTasks);
+
+        const result = await binCollection.deleteMany({ _id: { $in: objectIds }, email });
+
+        if (result.deletedCount > 0) {
+            res.status(200).json({ status: 'success', message: 'Tasks restored successfully.' });
+        } else {
+            res.status(500).json({ status: 'error', message: 'Failed to restore tasks.' });
+        }
+    } catch (error) {
+        console.error('Error restoring tasks:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to restore tasks.' });
+    }
+});
+
+app.post('/deletePermanently', async (req, res) => {
+    if (!req.cookies.auth || req.cookies.auth !== 'true' || !req.cookies.email) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const email = req.cookies.email;
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'No task IDs provided.' });
+    }
+
+    try {
+        const objectIds = ids.map(id => new ObjectId(id));
+        const result = await binCollection.deleteMany({ _id: { $in: objectIds }, email });
+
+        if (result.deletedCount > 0) {
+            res.status(200).json({ status: 'success', message: 'Tasks deleted permanently.' });
+        } else {
+            res.status(404).json({ status: 'error', message: 'No tasks found for the provided IDs.' });
+        }
+    } catch(error) {
+        console.error('Error deleting tasks permanently:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to delete tasks permanently.' });
+    }
+});
 
 /* -- Middleware to edit a given task -- */
 app.post('/editTask', async (req, res) => {

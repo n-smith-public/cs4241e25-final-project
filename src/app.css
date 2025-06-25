@@ -4,6 +4,7 @@
   --option: #000;
   --highlight: #ff5800;
   --links: #114D9C;
+  --warning: #c91616;
 }
 
 /* Site-wide properties */
@@ -307,8 +308,8 @@ select.field option {
   vertical-align: middle;
   border-bottom: 2px solid var(--option);
   border-top: 2px solid var(--option);
-  color: var(--option);
-  background-color: var(--base);
+  color: var(--base);
+  background-color: var(--links);
   line-height: 1.2;
 }
 

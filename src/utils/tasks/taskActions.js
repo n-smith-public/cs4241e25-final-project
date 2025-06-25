@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import swal from 'sweetalert';
 
 /* Task Modification */
 
@@ -21,7 +22,7 @@ function formatDT(date) {
 }
 
 // Mark a task as complete or incomplete
-export async function markComplete(selectedTasks, tasks, loadTasks, updateActionMenuFunction) {
+export async function markComplete(selectedTasks, tasks, loadTasks) {
     // Fetch all of the tasks and selected tasks
     const currentSelectedTasks = get(selectedTasks);
     const currentTasks = get(tasks);
@@ -51,7 +52,6 @@ export async function markComplete(selectedTasks, tasks, loadTasks, updateAction
       if (result.status === 'success') {
         await loadTasks();
         selectedTasks.set(new Set());
-        updateActionMenuFunction();
         swal('Success', 'Task updated successfully!', 'success');
       } else {
         swal('Error', 'Failed to update task.', 'error');
@@ -97,7 +97,7 @@ export function editTask(selectedTasks, tasks) {
   }
 
   // Show the edit modal
-  export async function saveEdit(event, loadTasks, selectedTasks, updateActionMenu) {
+  export async function saveEdit(event, loadTasks, selectedTasks) {
     event.preventDefault();
 
     // Save the current values of the task being edited to local values
@@ -128,7 +128,6 @@ export function editTask(selectedTasks, tasks) {
         showEditModal.set(false);
         loadTasks();
         selectedTasks.set(new Set());
-        updateActionMenu();
         swal('Success', 'Task updated successfully!', 'success');
       } else {
         swal('Error', 'Failed to update task.', 'error');
@@ -150,16 +149,17 @@ export function deleteTask(selectedTasks) {
 }
 
 // Confirm deletion of selected tasks
-export async function confirmDelete(selectedTasks, loadTasks, selectAll, updateActionMenu) {
+export async function confirmDelete(selectedTasks, loadTasks, selectAll) {
     // Fetch all of the selected tasks
     const currentSelectedTasks = get(selectedTasks);
+    const ids = Array.from(currentSelectedTasks);
 
     try {
       // Call the /deleteTask endpoint to delete the selected tasks
       const response = await fetch('/deleteTask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: Array.from(currentSelectedTasks) })
+        body: JSON.stringify({ ids })
       });
 
       // Wait for the response
@@ -167,12 +167,12 @@ export async function confirmDelete(selectedTasks, loadTasks, selectAll, updateA
       // If successful, reload tasks and reset selected tasks
       if (result.status === 'success') {
         showDeleteModal.set(false);
-        loadTasks();
         selectedTasks.set(new Set());
         selectAll.set(false);
-        updateActionMenu();
+        await loadTasks();
         swal('Success', 'Tasks deleted successfully!', 'success');
       } else {
+        console.error('Failed to delete tasks:', result.message);
         swal('Error', 'Failed to delete tasks.', 'error');
       }
     } catch (error) {

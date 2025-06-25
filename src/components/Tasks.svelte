@@ -3,6 +3,7 @@
   import Header from './Header.svelte';
   import Footer from './Footer.svelte';
   import ImportModal from './ICAL.svelte';
+  import Bin from './Bin.svelte';
   // Import all of the task functions from tasks.js, which is a feeder from utils/tasks/*.js
   import { 
     tasks, 
@@ -39,7 +40,9 @@
     deselectAllEvents,
     importSelectedEvents,
     closeImportModal,
-    updateEventPriority
+    updateEventPriority,
+    showBin,
+    loadBinItems
   } from '../utils/tasks';
 
   export let navigateTo;
@@ -94,6 +97,15 @@
   function handleUpdatePriority(eventID, newPriority) {
     updateEventPriority(eventID, newPriority);
   }
+
+  function openBin() {
+    loadBinItems();
+    showBin.set(true);
+  }
+
+  function closeBin() {
+    showBin.set(false);
+  }
 </script>
 
 <!-- Pull the Header component -->
@@ -122,9 +134,16 @@
 <!-- Task List Table -->
 <table class="pure-table pure-table-striped" id="taskList">
   <thead>
-    <!-- Table Headers, will be adding sorting for final project -->
+    <!-- Table Headers -->
     <tr>
-      <th><input type="checkbox" bind:checked={$selectAll} on:change={handleSelectAll}></th>
+      <th>
+        <input 
+          type="checkbox" 
+          bind:checked={$selectAll} 
+          on:click|stopPropagation={handleSelectAll}
+          style="cursor: pointer; z-index: 10, position: relative;"
+        >
+      </th>
       <th class="sortable" on:click={() => onColClick('taskName')}>
         Task Name {getSortIcon('taskName', $sortColumn, $sortDirection)}
       </th>
@@ -179,12 +198,14 @@
   <div id="deleteModal" style="display: flex;">
     <div id="contents">
       <p>Are you sure you want to delete the selected task(s)?</p>
-      <button id="confirmDeleteBtn" class="button-error pure-button" on:click={confirmDelete}>
-        Yes, Delete
-      </button>
-      <button id="cancelDeleteBtn" class="pure-button" on:click={closeDeleteModal}>
-        Cancel
-      </button>
+      <div class="modal-buttons">
+        <button id="confirmDeleteBtn" class="button-error pure-button" on:click={confirmDelete}>
+          Yes, Delete
+        </button>
+        <button id="cancelDeleteBtn" class="pure-button" on:click={closeDeleteModal}>
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 {/if}
@@ -193,6 +214,10 @@
 {#if $showEditModal}
   <div id="editModal" style="display: flex;">
     <div id="contents">
+      <div class="modal-header">
+        <h2>Edit Task</h2>
+      </div>
+      <hr>
       <form on:submit={saveEdit}>
         <label>Task Name: <input type="text" bind:value={$editTaskName}></label><br>
         <label>Description: <input type="text" bind:value={$editTaskDescription}></label><br>
@@ -204,9 +229,9 @@
             <option value="high">High</option>
           </select>
         </label><br>
-        <div class="buttons">
-          <button type="submit" class="pure-button pure-button-primary">Save</button>
-          <button type="button" class="pure-button" on:click={closeEditModal}>Cancel</button>
+        <div class="modal-buttons">
+          <button id="confirmEditBtn" type="submit" class="pure-button pure-button-primary">Save</button>
+          <button id="cancelEditBtn" type="button" class="pure-button" on:click={closeEditModal}>Cancel</button>
         </div>
       </form>
     </div>
@@ -226,6 +251,16 @@
   />
 {/if}
 
+<div class="bin-section" title="Recycle Bin">
+  <button class="bin-button" on:click={openBin} aria-label="View Recycle Bin">
+    View Recycle Bin
+  </button>
+</div>
+
+{#if $showBin}
+  <Bin onClose={closeBin} />
+{/if}
+
 <!-- Pull the Footer component -->
 <Footer
   navigateTo={navigateTo} 
@@ -242,6 +277,11 @@
 
   td {
     color: var(--option);
+  }
+
+  .modal-header {
+    display: flex;
+    background-color: var(--base);
   }
 
   .sortable {
@@ -265,7 +305,7 @@
     justify-content: flex-end;
   }
 
-  .import-button {
+  .import-button, .bin-button {
     background-color: var(--links);
     color: var(--base);
     border: none;
@@ -274,12 +314,20 @@
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: bold;
+    margin-top: 1rem;
     transition: all 0.2s ease;
   }
 
-  .import-button:hover {
+  .import-button:hover, .bin-button:hover {
     background-color: var(--highlight);
     transform: translateY(-1px);
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
   #editModal input {
@@ -290,5 +338,41 @@
   #editModal select {
     color: var(--option);
     background-color: var(--base);
+  }
+
+  #confirmEditBtn {
+    background-color: var(--highlight);
+    color: var(--base);
+  }
+
+  #cancelEditBtn {
+    background-color: var(--base);
+    color: var(--option);
+  }
+
+  #deleteModal, #editModal {
+    color: var(--option);
+  }
+
+  #confirmDeleteBtn {
+    background-color: var(--warning);
+    color: var(--base);
+  }
+
+  #cancelDeleteBtn {
+    background-color: var(--base);
+    color: var(--option);
+    margin-left: auto;
+  }
+
+  #taskList th:first-child {
+    position: relative;
+    z-index: 10;
+  }
+
+  #taskList th:first-child input[type="checkbox"] {
+    cursor: pointer;
+    z-index: 11;
+    position: relative;
   }
 </style>

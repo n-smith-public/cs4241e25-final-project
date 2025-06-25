@@ -4,11 +4,12 @@ export * from './tasks/selectTasks.js';
 export * from './tasks/taskActions.js';
 export * from './tasks/sortTasks.js';
 export * from './tasks/importCal.js';
+export * from './tasks/bin.js';
 
 import { get } from 'svelte/store';
 // Import all of the functions from utils/tasks/*.js
 import { tasks, loadTasks as loadTasksOriginal } from './tasks/fetchTask.js';
-import { selectedTasks, selectAll, handleSelectAll as handleSelectAllOriginal, handleTaskSelect as handleTaskSelectOriginal, updateActionMenu } from './tasks/selectTasks.js';
+import { selectedTasks, selectAll, handleSelectAll as handleSelectAllOriginal, handleTaskSelect as handleTaskSelectOriginal } from './tasks/selectTasks.js';
 import { 
     markComplete as markCompleteOriginal, 
     editTask as editTaskOriginal, 
@@ -24,17 +25,15 @@ export const loadTasks = loadTasksOriginal;
     This is only required because functions are not in the same file anymore.
 */
 export function handleSelectAll() {
-    const currentTasks = get(tasks);
-    return handleSelectAllOriginal(currentTasks);
+    return handleSelectAllOriginal(tasks);
 }
 
 export function handleTaskSelect(taskId) {
-    const currentTasks = get(tasks);
-    return handleTaskSelectOriginal(taskId, currentTasks);
+    return handleTaskSelectOriginal(taskId, tasks);
 }
 
 export function markComplete() {
-    return markCompleteOriginal(selectedTasks, tasks, loadTasksOriginal, updateActionMenu);
+    return markCompleteOriginal(selectedTasks, tasks, loadTasksOriginal);
 }
 
 export function editTask() {
@@ -42,7 +41,7 @@ export function editTask() {
 }
 
 export function saveEdit(event) {
-    return saveEditOriginal(event, loadTasksOriginal, selectedTasks, updateActionMenu);
+    return saveEditOriginal(event, loadTasksOriginal, selectedTasks);
 }
 
 export function deleteTask() {
@@ -50,7 +49,7 @@ export function deleteTask() {
 }
 
 export function confirmDelete() {
-    return confirmDeleteOriginal(selectedTasks, selectAll, loadTasksOriginal, updateActionMenu);
+    return confirmDeleteOriginal(selectedTasks, loadTasksOriginal, selectAll);
 }
 
 export function addNewTasks(navigateTo) {

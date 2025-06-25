@@ -3,7 +3,7 @@
     import { getUserDisplayName } from '../utils/auth.js';
     import * as greetings from '../utils/greetings.js';
     import Settings from './Settings.svelte';
-    import { currentTheme } from '../utils/appearance.js';
+    import { currentTheme, themes } from '../utils/appearance.js';
 
     export let greeting = '';
     export let showRegister = false;
@@ -16,10 +16,12 @@
     let currentGreeting = '';
     let settingsComponent;
 
-    // Set the logo path based on theme (if a dark theme use Magnolia-white, otherwise use Magnolia)
-    $: logoPath = ($currentTheme === 'charcoal' || $currentTheme === 'midnight')
-      ? '/media/Magnolia-white.png'
-      : '/media/Magnolia.png'
+    $: logoPath = (() => {
+      const themeObj = themes[$currentTheme];
+      return (themeObj?.class === 'dark-theme' || themeObj?.class === 'inverted-theme')
+        ? '/media/Magnolia-white.png'
+        : '/media/Magnolia.png';
+    })();
 
     // Get the greeting when the component is nounted
     onMount(() => {

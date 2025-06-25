@@ -57,13 +57,6 @@
     background-color: var(--base);
   }
 
-  /* Swap colors if dark */
-  .dark-theme .field,
-  .inverted-theme .field {
-    color: var(--base);
-    background-color: var(--option);
-  }
-
   .field {
     color: var(--option);
     background-color: var(--base);
