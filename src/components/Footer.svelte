@@ -13,6 +13,10 @@
     function handleViewTasks() {
       navigateTo('tasks');
     }
+
+    function handleReturnHome() {
+        navigateTo('home');
+    }
 </script>
 
 <!-- Footer Contents -->
@@ -30,7 +34,7 @@
     {/if}
     {#if onContact}
       <span class="separator">|</span>
-      <button class="footer-button" on:click={() => handleAddNewTasks}>Return Home</button>
+      <button class="footer-button" on:click={handleReturnHome}>Return Home</button>
     {/if}
   </div>
   <div class="footer-credits">

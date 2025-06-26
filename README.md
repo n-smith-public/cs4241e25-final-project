@@ -1,56 +1,54 @@
-# Final Project
+# Magnolia
 
-[Example Projects from A23](https://echo360.org/collection/50a4d343-caea-4deb-93ee-61bdd7da543f/public)
+Created By: Nick
+Accessable at https://magnolia.greenbueller.com
 
-**More Example Projects:**
-- [https://pushbox.glitch.me/app](https://pushbox.glitch.me/app)
-- [https://github.com/Cather-Zhang/final_project](https://github.com/Cather-Zhang/final_project)
-- [https://clip.kmoene.com/](https://clip.kmoene.com/)
-- [https://github.com/GP2P/G3P-Expense-Tracker](https://github.com/GP2P/G3P-Expense-Tracker)
+## A Brief Overview
 
-For your final project, you'll implement a web application that exhibits understanding of the course materials. 
-This project should provide an opportunity to both be creative and to pursue individual research and learning goals.
-Decide whether you want to complete this project alone or with other members of the ISP.
+Magnolia, as seen in A2-A4 is a full-stack task management service, capable of helping you manage your time by keeping your deadlines in mind. With your unique login, you can add as many tasks as you would like to your task list, whether it be through manually adding or by importing an .ics (iCalendar) file from your regular calendar provider. Magnolia allows for flexibility to suit any needs.
 
-## General description
-Your project should consist of a complete Web application, exhibiting facets of the three main sections of the course material:
+The entire branding behind this project is based around a lyric video (for a song)[https://www.youtube.com/watch?v=7cL1hNAOmQA], as well as a line from said song. When starting Project 2 I had this on in the background, and decided to utilize the colour scheme for my project. From there, it slowly evolved as I thought of more ideas to add, like adding theme customization, adding ical support, adding a contact page, etc.
 
-- Static web page content and design. You should have a project that is accessible, easily navigable, and features significant content.
-- Dynamic behavior implemented with JavaScript (TypeScript is also allowed if your group wants to explore it).
-- Server-side programming *using Node.js*. Typically this will take the form of some sort of persistent data (database), authentication, and possibly server-side computation. 
-- A video (less than five minutes) where each group member explains some aspect of the project. An easy way to produce this video is for you all the groups members to join a Zoom call that is recorded; each member can share their screen when they discuss the project or one member can "drive" the interface while other members narrate (this second option will probably work better.) Upload the video to Canvas. (Further instructions are available in the Canvas assignment.) Make sure your video is less than five minutes but long enough to successfully explain your project and show it in action. There is no minimum video length.
+## Instructions
 
-## Project ideation
-Excellent projects typically serve someone/some group; for this assignment you need to define your users and stakeholders. I encourage you to identify projects that will have impact, either artistically, politically, or in terms of productivity. 
+Everything for the website should be self-explanatory, simply login or register and then access the tool.
 
-## Deliverables
+## Technologies
 
-### Proposal (Due Friday, June 13, 11:59 pm) 
-Provide an outline of your project direction and the names of associated team members, if any. The outline should have enough detail so that I can determine if it meets the minimum expectations or if it goes too far to be reasonable by the deadline. Please include a general description of the project and a list of key technologies/libraries you plan on using (e.g. React, Three.js, Svelte, TypeScript, etc.). Two to four paragraps should provide enough level of detail. Name the file proposal.md and submit a pull request. Your pull request does not need to have a specific name. Only one pull request is required per team.
+Magnolia makes use of the following tools:
+- Svelte
+- MongoDB
+- NodeJS
+- ExpressJS
+- Vite
+- Render for Hosting
+- CloudFlare for domain services and DDOS protection
 
-There are no other scheduled checkpoints for your project. 
+As well as the following libraries:
+- BodyParser
+- Path
+- FS
+- Crypto
+- NodeMailer
+- Moment
+- CookieParser
 
-### Turning in Your Project (Due Friday, June 27, 11:59 pm)
+The program makes use of both TypeScript for the Svelte components and JavaScript.
 
-Submit a second PR on the final project repo to turn in your app and code. Again, only one pull request per team.
+## Challenges, Accessibility, and Contributions
 
-Deploy your app, in the form of a webpage, to Glitch/Heroku/Digital Ocean or some other service; it is critical that the application functions correctly wherever you post it.
+### Challenges
 
-The README for your second pull request doesn’t need to be a formal report, but it should contain the following:
+There were quite a few challenges in this process, but I will simply talk about the ones that occurred since A4. As I mentioned before, adding the gradient theme was not possible. In the end, I ended up leaving theme customization as it was in A4 because of this, although I was considering adding the ability for the end user to have a custom theme tied to their individual account.
 
-1. A brief description of what you created, and a link to the project itself (two paragraphs of text)
-2. Any additional instructions that might be needed to fully use your project (login information, etc.)
-3. An outline of the technologies you used and how you used them.
-4. What challenges you faced in completing the project.
-5. What each group member was responsible for designing / developing.
-6. What accessibility features you included in your project.
+Another challenging aspect was trying to get the Contact form to behave properly. I originally wanted it to be accessible from all pages, but due to the way my authentication system worked, it would not allow logged in users to have their email/display name fill in properly as I intended. Thus, it is only accessible to logged in users. Another aspect was trying to meet the Svelte ARIA suggestions. These gave massive warnings across my VS Code and made it diffcult to find actual issues with my code. I believe most of the tool is accessible even if some of these still remain.
 
-Think of 1, 3, and 4 in particular in a similar vein to the design / technical achievements for A1—A4. Make a case for why what you did was challenging and why your implementation deserves a grade of 100%.
+### Accessibility
 
-The video described above is also due on Canvas at this time.
+Magnolia features multiple themes for different user preferences, including a bright theme with minimal colours, as well as an inverted theme. I would also add in other themes as needed if someone requested them. The website also makes liberal use of ARIA components, meaning essentially all aspects of it should be accessible to users who require usage of alternative tools for digital mobility.
 
-## FAQs
+As a feature of Svelte, it is also responsive, working on any size display. At some smaller resolutions, it may require scrolling left/right to view everything, but it would be otherwise infeasible to accomodate on a vertical resolution.
 
-**Can I use XYZ framework?** 
+### Contributions
 
-You can use any web-based frameworks or tools available, but for your server programming you need to use Node.js. Your client-side scripting language should be either JavaScript or TypeScript. Note that the staff may not be able to assist with TypeScript questions.
+This project was made entirely by myself. I made use of a tracking "sheet" via a Discord message for what I wanted to improve on.
