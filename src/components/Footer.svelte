@@ -2,6 +2,7 @@
     export let navigateTo;
     export let onHome = false;
     export let onTasks = false;
+    export let onContact = false;
 
     import { addNewTasks } from '../utils/tasks.js';
 
@@ -26,6 +27,10 @@
     {#if onTasks}
         <span class="separator">|</span>
         <button class="footer-button" on:click={handleAddNewTasks}>Add New Tasks</button>
+    {/if}
+    {#if onContact}
+      <span class="separator">|</span>
+      <button class="footer-button" on:click={() => handleAddNewTasks}>Return Home</button>
     {/if}
   </div>
   <div class="footer-credits">

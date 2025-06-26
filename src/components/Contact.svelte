@@ -187,6 +187,7 @@
   navigateTo={navigateTo} 
   onHome={false}
   onTasks={false}
+  onContact={true}
 />
 
 <style>
@@ -261,6 +262,12 @@
         cursor: not-allowed;
         opacity: 0.8;
         color: var(--option);
+        background: linear-gradient(135deg, 
+            color-mix(in srgb, var(--base) 90%, var(--highlight) 10%), 
+            color-mix(in srgb, var(--base) 80%, var(--highlight) 20%)
+        );
+        border: 2px solid var(--option);
+        font-style: italic;
     }
 
     /* Fix: Follow Home.svelte pattern for select and options */

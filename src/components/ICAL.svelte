@@ -255,14 +255,6 @@
         margin-bottom: 1rem;
         color: var(--option);
     }
-
-    .no-events-note {
-        display: block;
-        font-style: italic;
-        color: var(--option);
-        opacity: 0.8;
-        margin-top: 0.5rem;
-    }
     
     .selection-controls {
         display: flex;
