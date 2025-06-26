@@ -84,7 +84,7 @@ app.get('/robots.txt', (req, res) => {
 /* -- Prevent user from accessing protected pages if not logged in -- */
 app.use((req, res, next) => {
     // Anything that can be publicly accessed, such as registration/login pages and the associated endpoints, as well as static files
-    const publicEndpoints = ['/login', '/register', '/sendOTP', '/verifyOTP', '/registerUser', '/robots.txt', '/entries', '/submit', '/deleteTask', '/editTask', '/complete', '/updateDisplayName'];
+    const publicEndpoints = ['/login', '/register', '/sendOTP', '/verifyOTP', '/registerUser', '/robots.txt', '/entries', '/submit', '/deleteTask', '/editTask', '/complete', '/updateDisplayName', '/sendEmail',];
     const staticElements = req.path.startsWith('/css') || req.path.startsWith('/assets') || req.path === '/vite.svg';
     // If the request is for one of these, pass the user through.
     if (publicEndpoints.includes(req.path) || staticElements ) {
@@ -105,6 +105,10 @@ app.get('/home', (req, res) => {
 });
 
 app.get('/tasks', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.get('/contact', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
@@ -231,7 +235,7 @@ app.post('/verifyOTP', async (req, res) => {
     //-- Display name cookie is the user's display name, which is used to greet the user.
     res.cookie('displayName', user.displayName, { httpOnly: false, secure: false, maxAge: 60 * 60 * 1000 });
     //-- Email cookie is the user's email, which is used to idenftify the user in the database.
-    res.cookie('email', user.email, { httpOnly: true, secure: false, maxAge: 60 * 60 * 1000 });
+    res.cookie('email', user.email, { httpOnly: false, secure: false, maxAge: 60 * 60 * 1000 });
     // Return a success message.
     res.status(200).json({ status: 'success', message: 'OTP verified successfully.' });
 });
@@ -514,6 +518,62 @@ app.post('/complete', async (req, res) => {
     // If the task was updated successfully, return a 200 success response.
     res.status(200).json({ status: 'success', message: 'Task updated successfully.' });
 })
+
+app.post('/sendEmail', async (req, res) => {
+    if (!req.cookies.auth || req.cookies.auth !== 'true' || !req.cookies.email) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const { email, displayName, subject, contents, category } = req.body;
+
+        if (!subject || !contents || !category) {
+            return res.status(400).json({ error: 'Subject, contents, and category are required.' });
+        }
+
+        if (email !== req.cookies.email) {
+            return res.status(403).json({ error: 'You can only send emails from your own account.' });
+        }
+
+        const emailTemplate = fs.readFileSync(path.join(__dirname, 'contactEmail.html'), 'utf8');
+
+        const emailContent = emailTemplate
+            .replace('{{displayName}}', displayName)
+            .replace('{{email}}', email)
+            .replace('{{category}}', category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()))
+            .replace('{{subject}}', subject)
+            .replace('{{date}}', new Date().toLocaleString())
+            .replace('{{contents}}', contents);
+        
+            const textContent = `Magnolia Support Request
+            
+            From: ${displayName} <${email}>
+            Category: ${category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            Subject: ${subject}
+            Date: ${new Date().toLocaleString()}
+            
+            Message:
+            ${contents}
+            
+            ---
+            This message was sent from Magnolia's contact form.
+            `;
+
+            await transporter.sendMail({
+                from: `"Magnolia Support" <${confEmail}>`,
+                to: 'greenbueller@greenbueller.com',
+                replyTo: `"${displayName}" <${email}>`,
+                subject: `[Magnolia Support] ${category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${subject}`,
+                html: emailContent,
+                text: textContent
+            });
+
+            res.status(200).json({ status: 'success', message: 'Email sent successfully.' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to send email.' });
+    }
+});
 
 app.get('*', (req, res) => {
     res.status(404).send('Page not found');

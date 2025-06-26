@@ -19,6 +19,7 @@ export default defineConfig({
       '/recycleBin': 'http://localhost:3000/',
       '/restoreTask': 'http://localhost:3000/',
       '/deletePermanently': 'http://localhost:3000/',
+      '/sendEmail': 'http://localhost:3000/',
     }
   },
   build: {

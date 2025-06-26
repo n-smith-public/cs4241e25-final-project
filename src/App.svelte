@@ -5,6 +5,7 @@
   import Register from './components/Register.svelte';
   import Home from './components/Home.svelte';
   import Tasks from './components/Tasks.svelte';
+  import Contact from './components/Contact.svelte';
 
   let currentRoute = '';
 
@@ -37,4 +38,6 @@
   <Home {navigateTo} />
 {:else if currentRoute === 'tasks'}
   <Tasks {navigateTo} />
+{:else if currentRoute === 'contact'}
+  <Contact {navigateTo} />
 {/if}

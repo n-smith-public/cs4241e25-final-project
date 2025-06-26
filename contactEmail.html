@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Magnolia Support Request</title>
+        <style>
+            /* Emails can't pull CSS from server, so need to provide directly */
+            html {
+                background-color: #f5eed0;
+                font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+                font-size: 15px;
+                color: #000;
+            }
+
+            body {
+                width: 75%;
+                margin: auto;
+                padding: 15px;
+                line-height: 1.5;
+            }
+
+            .header-logo {
+                display: flex;
+                align-items: center;
+                margin: auto;
+                justify-content: space-between;
+            }
+
+            .info-box {
+                background-color: #e8f4fd;
+                border-left: 4px solid #114d9c;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 4px;
+            }
+
+            .category {
+                display: inline-block;
+                background-color: #114d9c;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 15px;
+                font-size: 0.9em;
+                font-weight: bold;
+            }
+
+            .message-content {
+                background-color: #ffffff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin: 15px 0;
+                border-radius: 5px;
+                white-space: pre-wrap;
+            }
+
+            .user-info {
+                margin: 10px 0;
+                font-size: 1em;
+            }
+
+            .footer-note {
+                color: #666;
+                font-size: 0.9em;
+                font-style: italic;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Same as site-wide header, but uses a free photo hosting service for the company logo -->
+        <header>
+            <div id="header-logo">
+                <div style="display: flex; align-items: center;">
+                    <img id="logo" src="https://files.catbox.moe/cdl3hc.png" alt="Magnolia" style="height: 50px; width: auto; margin-right: 10px;">
+                    <h1>Magnolia Support Request</h1>
+                </div>
+            </div>
+        </header>
+        <hr>
+
+        <div class="info-box">
+            <h3>Contact Information</h3>
+            <div class="user-info">
+                <strong>Name:</strong> {{displayName}}<br>
+                <strong>Email:</strong> {{email}}<br>
+                <strong>Category:</strong> <span class="category">{{category}}</span><br>
+                <strong>Subject:</strong> {{subject}}<br>
+                <strong>Date:</strong> {{date}}
+            </div>
+        </div>
+        
+        <h3>Message:</h3>
+        <div class="message-content">{{contents}}</div>
+        
+        <hr>
+        <footer>
+            <div class="footer-note">
+                This message was sent through the Magnolia task management application contact form.
+                You can reply directly to this email to respond to the user.
+            </div>
+        </footer>
+    </body>
+</html>

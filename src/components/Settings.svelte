@@ -107,6 +107,10 @@
                 <!-- Logout, must be in authenticated page to do -->
                 {#if authRequired}
                     <hr>
+                    <button id="contact" class="pure-button" on:click={() => window.location.href = '/contact'}>
+                        Contact Us
+                    </button>
+                    <hr>
                     <button id="logout" class="pure-button" on:click={logout}>
                         Logout
                     </button>
