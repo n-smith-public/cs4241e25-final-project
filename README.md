@@ -7,7 +7,7 @@ Accessable at https://magnolia.greenbueller.com
 
 Magnolia, as seen in A2-A4 is a full-stack task management service, capable of helping you manage your time by keeping your deadlines in mind. With your unique login, you can add as many tasks as you would like to your task list, whether it be through manually adding or by importing an .ics (iCalendar) file from your regular calendar provider. Magnolia allows for flexibility to suit any needs.
 
-The entire branding behind this project is based around a lyric video (for a song)[https://www.youtube.com/watch?v=7cL1hNAOmQA], as well as a line from said song. When starting Project 2 I had this on in the background, and decided to utilize the colour scheme for my project. From there, it slowly evolved as I thought of more ideas to add, like adding theme customization, adding ical support, adding a contact page, etc.
+The entire branding behind this project is based around a lyric video [for a song](https://www.youtube.com/watch?v=7cL1hNAOmQA), as well as a line from said song. When starting Project 2 I had this on in the background, and decided to utilize the colour scheme for my project. From there, it slowly evolved as I thought of more ideas to add, like adding theme customization, adding ical support, adding a contact page, etc.
 
 ## Instructions
 
@@ -52,3 +52,5 @@ As a feature of Svelte, it is also responsive, working on any size display. At s
 ### Contributions
 
 This project was made entirely by myself. I made use of a tracking "sheet" via a Discord message for what I wanted to improve on.
+
+In order to make sure this worked well, I asked multiple of my friend groups for feedback on this, although it was not quite guided line the process for A3. So far, besides some confusion regarding login, everyone seemed to be able to operate it intuitvely.
